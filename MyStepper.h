@@ -11,7 +11,6 @@ class MyStepper {
     String goAway();
     void setHomeSensor(int pin);
     void setAwaySensor(int pin);
-    void setSensor(int pin1, int pin2);
     String calibrateStepper();
     bool isCalibrated();
     void sleep();

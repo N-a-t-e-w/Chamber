@@ -1,5 +1,5 @@
 /*
-   This library is used to help with logging data on to an SD card
+   This library is used to help with logging data on an SD card
 
    MySD() requires &rtc and CS pin
 
@@ -49,12 +49,11 @@ String MySD::deleteFile(String fname) {
 }
 
 //Takes 2 strings, could be changed to 1 but leaving two for now.
-String MySD::logData(String action, String data) {
+void MySD::logData(String action, String data) {
   File file = SD.open(_filename, FILE_WRITE);
   DateTime now = _rtc->now();
   String thisTime = String(now.year() + String("/") + now.month() + String("/") + now.day() + String(",") + now.hour()) + String(":") + String(now.minute()) + String(":") + String(now.second());
   file.println((thisTime + String(",") + action + String(",") + data + String(",")));
   file.close();
-  return String(thisTime + String(",") + action + String(",") + data + String(","));
 
 }

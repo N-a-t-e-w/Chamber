@@ -256,7 +256,7 @@ void closeLid() {
 void flushChamber() {
   myLcd.displayInfo("Flushing Chamber", "Opening Lid", "", "");
   openLid();
-  delay(secToMili(flushTime)); //secToMili = flushTime*1000
+  delay(secToMili(flushTime)); 
   myLcd.displayInfo("Flushing Chamber", "Closing Lid", "", "");
   closeLid();
   mysd.logData("Chamber Flushed", logSensors()); //Logging Chamber flush
@@ -297,13 +297,6 @@ void menu() {
           clcd.clear();
           break;
         }
-      case 2: //testProgram()
-        boolProgramSelect = true;
-        programNum = 2;
-        clcd.clear();
-        clcd.print("2 Selected");
-        delay(1000);
-        break;
       case 3: //Calibrate stepper
         myLcd.displayInfo("Make sure chamber", "is clear of objects", "calibrating...", "reset to cancel");
         delay(5000);
@@ -336,11 +329,7 @@ void checkTime() {
         boolCheckTime = true;
         fname = twoChar(now.month()) + twoChar(now.day()) + twoChar(now.hour()) + twoChar(now.minute()) + ".csv";
         mysd.setFileName(fname);
-        clcd.clear();
-        clcd.setCursor(0, 0);
-        clcd.print("FILE CREATED:");
-        clcd.setCursor(0, 1);
-        clcd.print(fname);
+        myLcd.displayInfo("FILE CREATED",fname,"","")
         delay(2000);
         clcd.clear();
         break;
@@ -365,7 +354,7 @@ void setTime() {
   yr = myLcd.getInt("YEAR?");
   mth = myLcd.getInt("MONTH?");
   dy = myLcd.getInt("DAY?");
-  hr = myLcd.getInt("HOUR?");
+  hr = myLcd.getInt("HOUR? (24 HOUR)");
   mn = myLcd.getInt("MINUTE?");
   rtc.adjust(DateTime(yr, mth, dy, hr, mn, 0));
   delay(100);
@@ -374,23 +363,18 @@ void setTime() {
 //cheacks RTC and SD are working
 void CheckRTCandSD() {
   if (!rtc.begin()) { //Checks to see if RTC is working, if not, freeze the program
-    clcd.clear();
-    clcd.print("ERROR");
-    clcd.setCursor(0, 1);
-    clcd.print("RTC NOT FOUND");
+    myLdd.displayInfo("ERROR","CHECK RTC","","");
     while (true) {
     }
   }
   if (!mysd.initialise()) {//Checks to see if SD is working, if not, freeze the program
-    clcd.clear();
-    clcd.print("ERROR");
-    clcd.setCursor(0, 1);
-    clcd.print("SD ERROR");
+    myLcd.displayInfo("ERROR","CHECK SD CARD","","");
     while (true) {
     }
   }
 }
 
+//never deals with negative
 //Formats int to string from "5" -> "05" or "15" -> "15"
 String twoChar(int in) {
   if (in < 10) {

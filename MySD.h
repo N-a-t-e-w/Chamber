@@ -9,12 +9,11 @@ class MySD {
   public:
     MySD(RTC_DS3231* rtc, int cs);
     bool initialise();
-    String logData(String action, String data);
+    void logData(String action, String data);
     String deleteFile(String filename);
     void setFileName(String filename);
   private:
     RTC_DS3231 *_rtc;
-    String getTime();
     int _cs;
     String _filename;
 };

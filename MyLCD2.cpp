@@ -27,8 +27,8 @@
 
 
 
-LiquidCrystal_I2C *_clcd;
-Keypad *_ckeypad;
+//LiquidCrystal_I2C *_clcd;
+//Keypad *_ckeypad;
 
 MyLCD2::MyLCD2(Keypad * ckeypad, LiquidCrystal_I2C * lcd) {
   _ckeypad = ckeypad;
@@ -69,6 +69,7 @@ String MyLCD2::twoChar(int in) {
   else
     return String(in);
 }
+
 int MyLCD2::getInt(String question) {
   char key;
   while (true) {

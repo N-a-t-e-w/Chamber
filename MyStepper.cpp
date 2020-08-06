@@ -139,8 +139,3 @@ void MyStepper::setAwaySensor(int pin) {
   _awaySensor = pin;
   _awaySet = true;
 }
-
-void MyStepper::setSensor(int pin1, int pin2) {
-  _sensor1 = pin1;
-  _sensor2 = pin2;
-}

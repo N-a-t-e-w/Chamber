@@ -181,6 +181,11 @@ void TestRun() {
   for (int i = 0; i < numSamples; i++) {
     //flushChamber();
     for (int x = 0; x < sampleLength; x++) {
+      if (x % 3 == 0) {//not needed
+        //runFan(); //Will run fan for a minute every 3 minutes
+      } else {
+        //stopFan();
+      }
       mysd.logData("Sample logging", logSensors());
       displayCurrentInfo(x, i);
       delay(minuteToMili(1));
@@ -211,8 +216,15 @@ void StandardRun() {
   }
   for (int i = 0; i < numSamples; i++) {//run for each sample
     flushChamber();
-    for (int x = 0; x < sampleLength; x++) {
-      mysd.logData("Sample logging", logSensors());
+    for (int x = 0; x < sampleLength; x++) {//during each "sample" the fan will run intermittently
+      if (x % 3 == 0) {
+        runFan(); //Will run fan for a minute every 3 minutes
+        boolFan = true;
+      } else if (boolFan) {
+        stopFan();
+      } else {
+        mysd.logData("Sample logging", logSensors());
+      }
       displayCurrentInfo(x, i);
       delay(minuteToMili(1));
     }
@@ -237,7 +249,6 @@ void displayCurrentInfo(int x, int i) {
                     String(""));
   myLcd.displayTime(rtc.now());
 }
-
 //Awake and open lid
 void openLid() {
   mystepper.wake();
@@ -252,11 +263,29 @@ void closeLid() {
   mysd.logData("Closed lid", logSensors());
 }
 
+//Turns on interior fan
+void runFan() {
+  //not implemented
+  mysd.logData("Fan Started", logSensors());
+  delay(500);
+}
+
+//stops interior fan
+void stopFan() {
+  //not implemented
+  mysd.logData("Fan Stopped", logSensors());
+  delay(500);
+}
+
 //Opens the chamber, runs the fan for an amount of time, and closes the chamber
 void flushChamber() {
   myLcd.displayInfo("Flushing Chamber", "Opening Lid", "", "");
   openLid();
-  delay(secToMili(flushTime)); 
+  myLcd.displayInfo("Flushing Chamber", "Running fan", "", "");
+  runFan();
+  delay(secToMili(flushTime)); //secToMili = flushTime*1000
+  myLcd.displayInfo("Flushing Chamber", "Fan stopped", "", "");
+  stopFan();
   myLcd.displayInfo("Flushing Chamber", "Closing Lid", "", "");
   closeLid();
   mysd.logData("Chamber Flushed", logSensors()); //Logging Chamber flush
@@ -297,6 +326,13 @@ void menu() {
           clcd.clear();
           break;
         }
+      case 2: //testProgram()
+        boolProgramSelect = true;
+        programNum = 2;
+        clcd.clear();
+        clcd.print("2 Selected");
+        delay(1000);
+        break;
       case 3: //Calibrate stepper
         myLcd.displayInfo("Make sure chamber", "is clear of objects", "calibrating...", "reset to cancel");
         delay(5000);
@@ -305,6 +341,20 @@ void menu() {
         myLcd.displayInfo("CALIBRATED", "", "", "");
         delay(2000);
         myLcd.displayInfo("", "", "", "");
+        break;
+      case 6: //Move stepper up 500 steps
+        programNum = 3;
+        clcd.clear();
+        clcd.print("6 Selected");
+        mystepper.goTo(500);
+        delay(1000);
+        break;
+      case 9: //move stepper down 500 steps
+        programNum = 4;
+        clcd.clear();
+        clcd.print("9 Selected");
+        mystepper.goTo(-500);
+        delay(1000);
         break;
       default:
         clcd.clear();
@@ -329,7 +379,11 @@ void checkTime() {
         boolCheckTime = true;
         fname = twoChar(now.month()) + twoChar(now.day()) + twoChar(now.hour()) + twoChar(now.minute()) + ".csv";
         mysd.setFileName(fname);
-        myLcd.displayInfo("FILE CREATED",fname,"","")
+        clcd.clear();
+        clcd.setCursor(0, 0);
+        clcd.print("FILE CREATED:");
+        clcd.setCursor(0, 1);
+        clcd.print(fname);
         delay(2000);
         clcd.clear();
         break;
@@ -354,7 +408,7 @@ void setTime() {
   yr = myLcd.getInt("YEAR?");
   mth = myLcd.getInt("MONTH?");
   dy = myLcd.getInt("DAY?");
-  hr = myLcd.getInt("HOUR? (24 HOUR)");
+  hr = myLcd.getInt("HOUR?");
   mn = myLcd.getInt("MINUTE?");
   rtc.adjust(DateTime(yr, mth, dy, hr, mn, 0));
   delay(100);
@@ -363,18 +417,23 @@ void setTime() {
 //cheacks RTC and SD are working
 void CheckRTCandSD() {
   if (!rtc.begin()) { //Checks to see if RTC is working, if not, freeze the program
-    myLdd.displayInfo("ERROR","CHECK RTC","","");
+    clcd.clear();
+    clcd.print("ERROR");
+    clcd.setCursor(0, 1);
+    clcd.print("RTC NOT FOUND");
     while (true) {
     }
   }
   if (!mysd.initialise()) {//Checks to see if SD is working, if not, freeze the program
-    myLcd.displayInfo("ERROR","CHECK SD CARD","","");
+    clcd.clear();
+    clcd.print("ERROR");
+    clcd.setCursor(0, 1);
+    clcd.print("SD ERROR");
     while (true) {
     }
   }
 }
 
-//never deals with negative
 //Formats int to string from "5" -> "05" or "15" -> "15"
 String twoChar(int in) {
   if (in < 10) {
